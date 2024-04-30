@@ -1,5 +1,5 @@
 import bcrypt from "bcrypt";
-import { User } from "../models/User.js";
+import User from "../models/User.js";
 import { 
     generateAccessToken,
     generateRefreshToken,
@@ -37,6 +37,7 @@ export const registerUser = async (req, res) => {
 export const login = async (req, res) => {
     try {
         const { email, password } = req.body;
+        console.log("called");
         const user = await User.findOne({ email });
         if (!user) {
             return res.status(401).json({ error: 'Invalid email or password' });
@@ -54,15 +55,22 @@ export const login = async (req, res) => {
 };
 export const refreshToken = async (req, res) => {
     const refreshToken = req.body.refreshToken;
+    console.log('Received refresh token:', refreshToken);
+
     try {
         const userId = await verifyRefreshToken(refreshToken);
+        console.log('Decoded user ID:', userId);
+
         const accessToken = generateAccessToken(userId);
+        console.log('Generated access token:', accessToken);
+
         res.json({ accessToken });
     } catch (error) {
-        console.error(error);
+        console.error('Error refreshing access token:', error);
         res.status(401).json({ error: 'Invalid refresh token' });
     }
 };
+
 export const signUpWithFacebook = passport.authenticate('facebook');
 
 export const signUpWithTwitter = passport.authenticate('twitter');
@@ -74,3 +82,16 @@ export const signUpWithGoogle = passport.authenticate('google');
 export const socialAuthCallback = (req, res) => {
   res.send('Social authentication successful');
 };
+export const profile = async (req,res) =>{
+    try {
+        const userId = req.user._id;
+        const user = await User.findById(userId);
+        if (!user) {
+            return res.status(404).json({ message: "User not found" });
+        }
+        res.json(user);
+      } catch (error) {
+        console.error(error);
+        res.status(500).json({ message: "Internal server error" });
+      }
+}

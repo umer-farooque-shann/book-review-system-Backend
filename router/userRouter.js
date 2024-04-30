@@ -1,5 +1,5 @@
 import express from "express";
-import { login, registerUser,refreshToken } from "../controller/userController.js";
+import { login, registerUser,refreshToken,profile } from "../controller/userController.js";
 import { authenticate } from "../middleware/authenticate.js";
 import passport from '../config/auth.js';
 import { signUpWithFacebook, signUpWithTwitter, signUpWithApple, signUpWithGoogle, socialAuthCallback } from '../controller/userController.js';
@@ -7,7 +7,7 @@ import { signUpWithFacebook, signUpWithTwitter, signUpWithApple, signUpWithGoogl
 const router = express.Router()
 
 router.post('/auth/register', registerUser)
-router.get('/auth/login', login)
+router.post('/auth/login', login)
 router.get('/auth/protected-route', authenticate, (req, res) => {
     res.json({ message: `Welcome, ${req.user.name}! You have access to this protected route. Test` });
 });
@@ -22,5 +22,6 @@ router.get('/auth/twitter/callback', passport.authenticate('twitter', { failureR
 router.get('/auth/apple/callback', passport.authenticate('apple', { failureRedirect: '/login' }), socialAuthCallback);
 router.get('/auth/google/callback', passport.authenticate('google', { failureRedirect: '/login' }), socialAuthCallback);
 
+router.get('/auth/profile',authenticate,profile)
 
 export default router

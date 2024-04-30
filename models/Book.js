@@ -27,8 +27,12 @@ const bookSchema = new Schema({
   },
   image: {
     type: String,
-    required: true 
+    required: true // Mark the image field as required
   },
+  genres: [{
+    type: String,
+    required: true
+  }],
   ratings: [{
     user: {
       type: Schema.Types.ObjectId,

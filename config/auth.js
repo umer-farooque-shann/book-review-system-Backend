@@ -4,12 +4,12 @@ import { Strategy as FacebookStrategy } from 'passport-facebook';
 import { Strategy as TwitterStrategy } from 'passport-twitter';
 import { Strategy as AppleStrategy } from 'passport-apple';
 import { Strategy as GoogleStrategy } from 'passport-google-oauth20';
-import { User } from '../models/User.js';
+
 
 
 
 export const generateAccessToken = (user) => {
-    return jwt.sign({ userId: user._id }, process.env.JWT_SECRET, { expiresIn: '15m' });
+    return jwt.sign({ userId: user._id }, process.env.JWT_SECRET, { expiresIn: '2d' });
 };
 
 export const generateRefreshToken = (user) => {

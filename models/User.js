@@ -1,4 +1,6 @@
 import mongoose from 'mongoose';
+import slugify from 'slugify';
+
 const { Schema } = mongoose;
 
 const userSchema = new Schema({
@@ -27,18 +29,19 @@ const userSchema = new Schema({
     type: Date,
     default: Date.now
   },
- 
   sentMessages: [{
     type: Schema.Types.ObjectId,
     ref: 'Message'
   }],
-
   receivedMessages: [{
     type: Schema.Types.ObjectId,
     ref: 'Message'
+  }],
+  books: [{
+    type: Schema.Types.ObjectId,
+    ref: 'Book'
   }]
 });
-
 
 userSchema.pre('save', function(next) {
   if (this.isModified('password')) {
@@ -49,4 +52,4 @@ userSchema.pre('save', function(next) {
 
 const User = mongoose.model('User', userSchema);
 
-export { User };
+export default User;

@@ -1,5 +1,5 @@
 import express from "express";
-import { login, registerUser,refreshToken,profile } from "../controller/userController.js";
+import { login, registerUser,refreshToken,profile ,addPreferredGenres } from "../controller/userController.js";
 import { authenticate } from "../middleware/authenticate.js";
 import passport from '../config/auth.js';
 import { signUpWithFacebook, signUpWithTwitter, signUpWithApple, signUpWithGoogle, socialAuthCallback } from '../controller/userController.js';
@@ -23,5 +23,6 @@ router.get('/auth/apple/callback', passport.authenticate('apple', { failureRedir
 router.get('/auth/google/callback', passport.authenticate('google', { failureRedirect: '/login' }), socialAuthCallback);
 
 router.get('/auth/profile',authenticate,profile)
+router.put('/auth/preferredGenres',authenticate, addPreferredGenres);
 
 export default router

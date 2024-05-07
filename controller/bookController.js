@@ -146,3 +146,116 @@ export const getAverageRating = async (req, res) => {
     return res.status(500).json({ message: 'Internal server error' });
   }
 };
+
+export const addBookToUser = async (req, res) => {
+  const { userId, bookId } = req.body; // Assuming you're sending the user ID along with the book ID
+  
+  try {
+    // Find the user by ID
+    const user = await User.findById(userId);
+
+    // Check if the book is already in the user's collection
+    if (user.books.includes(bookId)) {
+      // If the book is already in the collection, send a response indicating that
+      return res.status(400).json({ error: 'Book already exists in user collection' });
+    }
+
+    // If the book is not in the collection, push the book ID into the books array
+    user.books.push(bookId);
+    
+    // Save the updated user document
+    await user.save();
+
+    // Send a response indicating success
+    res.status(200).json({ message: 'Book added to user collection', user });
+  } catch (error) {
+    // Handle error and send a response with an error message
+    console.error('Error adding book to user collection:', error);
+    res.status(500).json({ error: 'Internal server error' });
+  }
+};
+
+export const getUserBooks = async (req, res) => {
+  try {
+    // Assuming you have middleware that verifies the JWT token and adds the user ID to the request object
+    const userId = req.user.id;
+
+    // Find the user by ID and populate the books array with details of each book
+    const user = await User.findById(userId).populate('books');
+
+    // If user not found, return a 404 Not Found response
+    if (!user) {
+      return res.status(404).json({ error: 'User not found' });
+    }
+
+    // Send the user's books with all details as a response
+    res.status(200).json({ books: user.books });
+  } catch (error) {
+    // Handle error and send a response with an error message
+    console.error('Error fetching user books:', error);
+    res.status(500).json({ error: 'Internal server error' });
+  }
+};
+
+
+export const removeBookFromUser = async (req, res) => {
+  try {
+    // Ensure that the request body contains the book ID
+    const { bookId } = req.body;
+    if (!bookId) {
+      return res.status(400).json({ error: 'Book ID is required' });
+    }
+
+    // Get the user ID from the request object (assuming it's added by authentication middleware)
+    const userId = req.user.id;
+
+    // Find the user by ID and remove the specified book from their collection
+    const user = await User.findByIdAndUpdate(userId, { $pull: { books: bookId } }, { new: true });
+
+    // If user not found, return a 404 Not Found response
+    if (!user) {
+      return res.status(404).json({ error: 'User not found' });
+    }
+
+    // Check if the book was successfully removed from the user's collection
+    if (!user.books.includes(bookId)) {
+      return res.status(404).json({ error: 'Book not found in user collection' });
+    }
+
+    // Send a response indicating success
+    res.status(200).json({ message: 'Book removed from user collection', user });
+  } catch (error) {
+    // Handle error and send a response with an error message
+    console.error('Error removing book from user collection:', error);
+    res.status(500).json({ error: 'Internal server error' });
+  }
+};
+
+export const getReadCount = async (req,res) => {
+  try {
+    // Get the authenticated user's ID from the request object
+    const userId = req.user.id;
+
+    // Find the user by their ID
+    const user = await User.findById(userId);
+
+    if (!user) {
+      return res.status(404).json({ error: 'User not found' });
+    }
+
+    // Extract book counts from the user object
+    const { read, currentlyReading, wantToRead } = user;
+
+    // Send the book counts in the response
+    res.status(200).json({
+      bookCounts: {
+        read: read.length,
+        currentlyReading: currentlyReading.length,
+        wantToRead: wantToRead.length
+      }
+    });
+  } catch (error) {
+    console.error('Error fetching user details:', error);
+    res.status(500).json({ error: 'Server error' });
+  }
+};

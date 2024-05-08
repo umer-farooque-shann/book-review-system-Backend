@@ -98,24 +98,17 @@ export const profile = async (req,res) =>{
 
 export const addPreferredGenres = async (req, res) => {
     try {
-      // Get the authenticated user's ID from the session or token
       const userId = req.user.id; // Assuming user ID is stored in req.user.id after authentication
       const { genres } = req.body;
-  
-      // Find the authenticated user by userId
       const user = await User.findById(userId);
   
       if (!user) {
         return res.status(404).json({ error: 'User not found' });
       }
-  
-      // Update the preferredGenres field with the new genres
       user.preferredGenres = genres;
-  
-      // Save the updated user object
       await user.save();
   
-      res.status(200).json(user); // Return the updated user object
+      res.status(200).json(user); 
     } catch (error) {
       res.status(400).json({ error: error.message }); // Handle any errors
     }

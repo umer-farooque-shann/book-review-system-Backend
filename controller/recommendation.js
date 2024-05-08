@@ -24,7 +24,14 @@ const parseGenreString = (genreInput) => {
     }
 };
 
-
+const calculateSimilarity = (userGenres, bookGenres) => {
+    // Implement your collaborative filtering algorithm here
+    // Example: Calculate similarity based on Jaccard similarity coefficient
+    const intersection = userGenres.filter(genre => bookGenres.includes(genre));
+    const union = [...new Set([...userGenres, ...bookGenres])];
+    const similarity = intersection.length / union.length;
+    return similarity;
+};
 
 const filterBooks = async (userId) => {
     try {
@@ -34,22 +41,23 @@ const filterBooks = async (userId) => {
             throw new Error('User or preferred genres not found or empty');
         }
 
-        const userInterests = user.preferredGenres.map(genre => genre.toLowerCase());
+        const userGenres = user.preferredGenres.map(genre => genre.toLowerCase());
 
         const matchingBooks = [];
         const books = await Book.find(); // Assuming you have a Book model
 
         for (const book of books) {
-            const rowGenres = parseGenreString(book.genres);
-            for (const userInterest of userInterests) {
-                if (rowGenres.some((genre) => genre.toLowerCase().includes(userInterest))) {
-                    matchingBooks.push(book);
-                    break;
-                }
+            const bookGenres = parseGenreString(book.genres);
+            const similarity = calculateSimilarity(userGenres, bookGenres);
+            // Adjust similarity threshold as needed
+            if (similarity > 0.2) { // Example threshold
+                matchingBooks.push({ book, similarity });
             }
         }
 
-        return matchingBooks.slice(0, 10);
+        // Sort matching books by similarity and return top 10
+        matchingBooks.sort((a, b) => b.similarity - a.similarity);
+        return matchingBooks.slice(0, 10).map(item => item.book);
     } catch (error) {
         throw error;
     }
@@ -66,4 +74,3 @@ export const getFilteredBooks = async (req, res) => {
         res.status(500).json({ error: 'Internal server error' });
     }
 };
-

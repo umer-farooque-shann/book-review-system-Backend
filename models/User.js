@@ -56,7 +56,11 @@ const userSchema = new Schema({
   }],
   preferredGenres: [{
     type: String // Store genre names
-  }]
+  }],
+  isFirstTimeLogin: {
+    type: Boolean,
+    default: true
+  }
 });
 
 userSchema.methods.addToCurrentlyReading = function(bookId) {

@@ -48,7 +48,7 @@ export const login = async (req, res) => {
         }
         const accessToken = generateAccessToken(user);
         const refreshToken = generateRefreshToken(user);
-        res.json({ accessToken, refreshToken, isAdmin: user.isAdmin });
+        res.json({ accessToken, refreshToken, isAdmin: user.isAdmin,isFirstTimeLogin:user.isFirstTimeLogin });
     } catch (err) {
         res.status(500).json({ error: err.message });
     }

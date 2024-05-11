@@ -1,7 +1,7 @@
 import User from "../models/User.js";
 import Book from "../models/Book.js";
 
-const parseGenreString = (genreInput) => {
+const parseGenreString = (genreInput) => { 
     try {
         let genreString;
         if (Array.isArray(genreInput)) {

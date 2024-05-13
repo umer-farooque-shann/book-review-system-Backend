@@ -2,9 +2,23 @@ import express from "express";
 import Book from "../models/Book.js";
 import User from "../models/User.js";
 import { authenticate } from "../middleware/authenticate.js";
-import {getReadCount, addBook ,getAllBooks,findBookBySlug,reviewBook,getBookRating ,getAverageRating ,addBookToUser,getUserBooks,removeBookFromUser} from "../controller/bookController.js";
+import {
+  getReadCount,
+  getAllCounts, 
+  addBook ,
+  getAllBooks,
+  findBookBySlug,
+  reviewBook,
+  getBookRating ,
+  getAverageRating ,
+  addBookToUser,
+  getUserBooks,
+  removeBookFromUser
+} from "../controller/bookController.js";
 import upload from "../middleware/multerMiddleware.js";
 import { getFilteredBooks } from "../controller/recommendation.js";
+import { createContact,getAllContacts ,deleteContactById} from "../controller/contactController.js";
+import { createRequest,getAllRequests } from "../controller/requestController.js";
 
 const router = express.Router()
 
@@ -21,14 +35,12 @@ router.get('/books/search',authenticate, async (req, res) => {
       res.status(500).json({ message: 'Error searching books' });
     }
   });
-
 router.post('/book/:slug/review',authenticate, reviewBook);
 router.get('/book/:slug/rating',authenticate, getBookRating);
 router.get('/books/:slug/average-rating',authenticate, getAverageRating);
 router.post('/add-book-to-user',authenticate,addBookToUser)
 router.get('/get-user-book',authenticate,getUserBooks)
 router.post('/remove-book',authenticate, removeBookFromUser);
-
 router.post('/:listType/:slug', authenticate, async (req, res) => {
   const { listType, slug } = req.params;
 
@@ -72,8 +84,13 @@ router.post('/:listType/:slug', authenticate, async (req, res) => {
     return res.status(500).json({ message: 'Internal server error' });
   }
 });
-
 router.get('/get-user-book-count',authenticate,getReadCount)
 router.get('/book-recommendation',authenticate,getFilteredBooks)
+router.get('/get-count-data',authenticate,getAllCounts)
+router.post('/contactpost',authenticate,createContact)
+router.get('/contactget',authenticate,getAllContacts)
+router.delete('/deleteContact/:id',authenticate,deleteContactById)
+router.post("/createRequest",authenticate,createRequest)
+router.get('/getAllRequests',authenticate,getAllRequests)
 
 export default router

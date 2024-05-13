@@ -45,6 +45,17 @@ export const getAllBooks = async (req, res) => {
   }
 };
 
+export const getAllCounts = async (req, res) => {
+  try {
+    const bookCount = await Book.countDocuments();
+    const userCount = await User.countDocuments();
+    res.status(200).json({ bookCount, userCount });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ error: 'Failed to fetch counts' });
+  }
+};
+
 export const findBookBySlug = async (req, res) => {
   const { slug } = req.params;
   try {

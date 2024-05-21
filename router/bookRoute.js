@@ -3,6 +3,7 @@ import Book from "../models/Book.js";
 import User from "../models/User.js";
 import { authenticate } from "../middleware/authenticate.js";
 import {
+  deleteBook,
   getReadCount,
   getAllCounts, 
   addBook ,
@@ -13,7 +14,8 @@ import {
   getAverageRating ,
   addBookToUser,
   getUserBooks,
-  removeBookFromUser
+  removeBookFromUser,
+  getReviews
 } from "../controller/bookController.js";
 import upload from "../middleware/multerMiddleware.js";
 import { getFilteredBooks } from "../controller/recommendation.js";
@@ -40,6 +42,7 @@ router.get('/book/:slug/rating',authenticate, getBookRating);
 router.get('/books/:slug/average-rating',authenticate, getAverageRating);
 router.post('/add-book-to-user',authenticate,addBookToUser)
 router.get('/get-user-book',authenticate,getUserBooks)
+router.delete('/deleteBook/:slug',authenticate,deleteBook)
 router.post('/remove-book',authenticate, removeBookFromUser);
 router.post('/:listType/:slug', authenticate, async (req, res) => {
   const { listType, slug } = req.params;
@@ -92,5 +95,6 @@ router.get('/contactget',authenticate,getAllContacts)
 router.delete('/deleteContact/:id',authenticate,deleteContactById)
 router.post("/createRequest",authenticate,createRequest)
 router.get('/getAllRequests',authenticate,getAllRequests)
+router.get('/getReviews/:slug/reviews',authenticate,getReviews)
 
 export default router

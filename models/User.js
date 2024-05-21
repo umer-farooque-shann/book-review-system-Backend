@@ -49,7 +49,6 @@ const userSchema = new Schema({
     type: Schema.Types.ObjectId,
     ref: 'Book'
   }],
-  // Define the books field for populating
   books: [{
     type: Schema.Types.ObjectId,
     ref: 'Book'
@@ -60,40 +59,62 @@ const userSchema = new Schema({
   isFirstTimeLogin: {
     type: Boolean,
     default: true
-  }
+  },
+  followers: [{
+    type: Schema.Types.ObjectId,
+    ref: 'User'
+  }],
+  following: [{
+    type: Schema.Types.ObjectId,
+    ref: 'User'
+  }]
 });
 
 userSchema.methods.addToCurrentlyReading = function(bookId) {
-  // Remove from other lists if exists
   this.wantToRead = this.wantToRead.filter(id => id.toString() !== bookId.toString());
   this.read = this.read.filter(id => id.toString() !== bookId.toString());
 
-  // Add to currentlyReading if not already present
   if (!this.currentlyReading.includes(bookId)) {
     this.currentlyReading.push(bookId);
   }
 };
 
 userSchema.methods.addToWantToRead = function(bookId) {
-  // Remove from other lists if exists
   this.currentlyReading = this.currentlyReading.filter(id => id.toString() !== bookId.toString());
   this.read = this.read.filter(id => id.toString() !== bookId.toString());
 
-  // Add to wantToRead if not already present
   if (!this.wantToRead.includes(bookId)) {
     this.wantToRead.push(bookId);
   }
 };
 
 userSchema.methods.addToRead = function(bookId) {
-  // Remove from other lists if exists
   this.currentlyReading = this.currentlyReading.filter(id => id.toString() !== bookId.toString());
   this.wantToRead = this.wantToRead.filter(id => id.toString() !== bookId.toString());
 
-  // Add to read if not already present
   if (!this.read.includes(bookId)) {
     this.read.push(bookId);
   }
+};
+
+userSchema.methods.follow = function(userId) {
+  if (!this.following.includes(userId)) {
+    this.following.push(userId);
+  }
+};
+
+userSchema.methods.unfollow = function(userId) {
+  this.following = this.following.filter(id => id.toString() !== userId.toString());
+};
+
+userSchema.methods.addFollower = function(userId) {
+  if (!this.followers.includes(userId)) {
+    this.followers.push(userId);
+  }
+};
+
+userSchema.methods.removeFollower = function(userId) {
+  this.followers = this.followers.filter(id => id.toString() !== userId.toString());
 };
 
 userSchema.pre('save', function(next) {

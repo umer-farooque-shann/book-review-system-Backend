@@ -1,7 +1,8 @@
 import express from "express";
-import { login, registerUser,refreshToken,profile ,addPreferredGenres } from "../controller/userController.js";
+import { login, registerUser,refreshToken,profile ,addPreferredGenres,followUser,unfollowUser,getUsersWithSimilarGenres } from "../controller/userController.js";
 import { authenticate } from "../middleware/authenticate.js";
 import passport from '../config/auth.js';
+import User from "../models/User.js";
 import { signUpWithFacebook, signUpWithTwitter, signUpWithApple, signUpWithGoogle, socialAuthCallback } from '../controller/userController.js';
 
 const router = express.Router()
@@ -24,5 +25,21 @@ router.get('/auth/google/callback', passport.authenticate('google', { failureRed
 
 router.get('/auth/profile',authenticate,profile)
 router.put('/auth/preferredGenres',authenticate, addPreferredGenres);
+router.post('/followUser', authenticate,followUser);
+router.post('/unfollowUser',authenticate, unfollowUser);
+router.get('/getUsersWithSimilarGenres',authenticate,getUsersWithSimilarGenres)
+
+router.get('/mutualFollowUsers', authenticate, async (req, res) => {
+    try {
+      const userId = req.user._id;
+      // Find users followed by the authenticated user
+      const followedByAuthUser = await User.find({ followers: userId });
+      // Find users who also follow the authenticated user
+      const mutualFollowUsers = followedByAuthUser.filter(user => user.followers.includes(userId));
+      res.status(200).json(mutualFollowUsers);
+    } catch (error) {
+      res.status(500).json({ message: error.message });
+    }
+  });
 
 export default router

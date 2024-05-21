@@ -18,14 +18,14 @@ export const createRequest = async (req, res) => {
   }
 };
 
-// Controller to get all requests for the authenticated user
 export const getAllRequests = async (req, res) => {
-  const { _id } = req.user; // Assuming user ID is stored in _id field of the user object
   try {
-    const requests = await Request.find({ user: _id }).populate('user', 'username'); // Populate user field with username only
+    const requests = await Request.find()
+      .populate('user', 'name email'); // Populate user field with name and email fields
     res.status(200).json(requests);
   } catch (error) {
     console.error(error);
     res.status(500).json({ error: 'Failed to fetch requests' });
   }
 };
+

@@ -207,6 +207,31 @@ export const getUserBooks = async (req, res) => {
     res.status(500).json({ error: 'Internal server error' });
   }
 };
+export const deleteBook = async (req, res) => {
+  const { slug } = req.params;
+  const userId = req.user.id;
+  try {
+    const book = await Book.findOne({ slug });
+    if (!book) {
+      return res.status(404).json({ error: 'Book not found' });
+    }
+    const user = await User.findById(userId);
+    if (!user) {
+      return res.status(404).json({ error: 'User not found' });
+    }
+    const bookIndex = user.books.indexOf(book._id);
+    if (bookIndex === -1) {
+      return res.status(404).json({ error: 'Book not found in user\'s list' });
+    }
+    user.books.splice(bookIndex, 1);
+    await user.save();
+    await Book.findByIdAndDelete(book._id);
+    res.status(200).json({ message: 'Book deleted successfully' });
+  } catch (error) {
+    console.error('Error deleting book:', error);
+    res.status(500).json({ error: 'Internal server error' });
+  }
+}
 
 
 export const removeBookFromUser = async (req, res) => {
@@ -268,5 +293,34 @@ export const getReadCount = async (req,res) => {
   } catch (error) {
     console.error('Error fetching user details:', error);
     res.status(500).json({ error: 'Server error' });
+  }
+};
+
+export const getReviews = async (req, res) => {
+  try {
+    const { slug } = req.params;
+    const { limit } = req.query; // New
+
+    const book = await Book.findOne({ slug });
+
+    if (!book) {
+      return res.status(404).json({ message: 'Book not found' });
+    }
+
+    let query = Review.find({ book: book._id }).populate('user', 'name').limit(parseInt(limit, 10)); // New
+
+    const reviews = await query;
+
+    const formattedReviews = reviews.map(review => ({
+      userName: review.user.name,
+      reviewText: review.reviewText,
+      createdDate: review.createdAt,
+      rating: review.rating,
+    }));
+
+    return res.status(200).json(formattedReviews);
+  } catch (error) {
+    console.error(error);
+    return res.status(500).json({ message: 'Internal server error' });
   }
 };

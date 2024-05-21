@@ -112,3 +112,79 @@ export const addPreferredGenres = async (req, res) => {
       res.status(400).json({ error: error.message }); // Handle any errors
     }
   };
+
+
+
+
+
+  export const followUser = async (req, res) => {
+    const userId = req.user._id;
+    const { followUserId } = req.body;
+  
+    try {
+      const user = await User.findById(userId);
+      const followUser = await User.findById(followUserId);
+  
+      if (!user || !followUser) {
+        return res.status(404).json({ message: 'User not found' });
+      }
+  
+      user.follow(followUserId);
+      followUser.addFollower(userId);
+  
+      await user.save();
+      await followUser.save();
+  
+      res.status(200).json({ message: `${user.name} is now following ${followUser.name}` });
+    } catch (error) {
+      res.status(500).json({ message: error.message });
+    }
+  };
+  
+  export const unfollowUser = async (req, res) => {
+    const userId = req.user._id;
+    const { unfollowUserId } = req.body;
+  
+    try {
+      const user = await User.findById(userId);
+      const unfollowUser = await User.findById(unfollowUserId);
+  
+      if (!user || !unfollowUser) {
+        return res.status(404).json({ message: 'User not found' });
+      }
+  
+      user.unfollow(unfollowUserId);
+      unfollowUser.removeFollower(userId);
+  
+      await user.save();
+      await unfollowUser.save();
+  
+      res.status(200).json({ message: `${user.name} has unfollowed ${unfollowUser.name}` });
+    } catch (error) {
+      res.status(500).json({ message: error.message });
+    }
+  };
+
+
+  
+  export const getUsersWithSimilarGenres = async (req, res) => {
+    const userId = req.user._id;
+  
+    try {
+      const user = await User.findById(userId).select('preferredGenres');
+  
+      if (!user) {
+        return res.status(404).json({ message: 'User not found' });
+      }
+  
+      const usersWithSimilarGenres = await User.find({
+        _id: { $ne: userId }, // Exclude the current user
+        preferredGenres: { $in: user.preferredGenres }
+      }).select('-password');
+  
+      res.status(200).json(usersWithSimilarGenres);
+    } catch (error) {
+      res.status(500).json({ message: error.message });
+    }
+  };
+  
